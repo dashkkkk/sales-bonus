@@ -1,4 +1,4 @@
-https://dashkkkk.github.io/sales-bonus/
+ https://github.com/dashkkkk/sales-bonus
 # Проектная работа "Пряники"
 5 спринт, модуль JS
 
