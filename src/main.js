@@ -36,6 +36,9 @@ function analyzeSalesData(data, options = {}) {
         data.purchase_records.length === 0) {
         throw new Error('Некорректные входные данные');
     }
+    if (options && typeof options !== 'object') {
+    throw new Error('Некорректные входные данные');
+}
 
     const calculateRevenue = options?.calculateRevenue || calculateSimpleRevenue;
     const calculateBonus = options?.calculateBonus || calculateBonusByProfit;
@@ -101,7 +104,7 @@ function analyzeSalesData(data, options = {}) {
         seller.top_products = Object.entries(seller.products_sold)
             .map(([sku, quantity]) => ({
                 sku,
-                name: productIndex[sku]?.name || 'Unknown Product',
+                // name: productIndex[sku]?.name || 'Unknown Product',
                 quantity
             }))
             .sort((a, b) => b.quantity - a.quantity)
@@ -111,10 +114,10 @@ function analyzeSalesData(data, options = {}) {
     return sellerStats.map(seller => ({
         seller_id: seller.id,
         name: seller.name,
-        revenue: +seller.revenue.toFixed(2),
-        profit: +seller.profit.toFixed(2),
+        revenue: parseFloat(seller.revenue.toFixed(2)),
+        profit: parseFloat(seller.profit.toFixed(2)),
         sales_count: seller.sales_count,
         top_products: seller.top_products,
-         bonus: +seller.bonus.toFixed(2),
+         bonus: parseFloat(seller.bonus.toFixed(2)),
     }));
 }
