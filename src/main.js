@@ -36,7 +36,7 @@ function calculateBonusByProfit(index, total, seller) {
     return Math.round(bonus * 100) / 100;
 }
 
-function analyzeSalesData(data, options = {}) {
+function analyzeSalesData(data, options) {  
     if (!data || !Array.isArray(data.sellers) || 
         !Array.isArray(data.purchase_records) || 
         !Array.isArray(data.products) ||
@@ -46,12 +46,13 @@ function analyzeSalesData(data, options = {}) {
         throw new Error('Некорректные входные данные');
     }
     
-    if (options && (typeof options !== 'object' || Array.isArray(options))) {
+  
+    if (arguments.length < 2 || typeof options !== 'object' || Array.isArray(options)) {
         throw new Error('Некорректные входные данные');
     }
 
-    const calculateRevenue = options?.calculateRevenue || calculateSimpleRevenue;
-    const calculateBonus = options?.calculateBonus || calculateBonusByProfit;
+    const calculateRevenue = options.calculateRevenue || calculateSimpleRevenue;
+    const calculateBonus = options.calculateBonus || calculateBonusByProfit;
 
     if (typeof calculateRevenue !== 'function' || typeof calculateBonus !== 'function') {
         throw new Error('Некорректные входные данные');
