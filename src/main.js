@@ -18,7 +18,7 @@ function calculateSimpleRevenue(purchase, _product) {
     const { discount = 0, sale_price, quantity } = purchase;
     const discountFactor = discount / 100;
     const totalPrice = sale_price * quantity;
-    return parseFloat((totalPrice * (1 - discountFactor)).toFixed(6));
+    return Math.round(totalPrice * (1 - discountFactor) * 100) / 100;
 }
 
 function calculateBonusByProfit(index, total, seller) {
@@ -27,11 +27,11 @@ function calculateBonusByProfit(index, total, seller) {
     else if (index === 1 || index === 2) bonus = seller.profit * 0.1;
     else if (index === total - 1) bonus = 0;
     else bonus = seller.profit * 0.05;
-   
+    
     return Math.round(bonus * 100) / 100;
 }
 
-function analyzeSalesData(data, options) { 
+function analyzeSalesData(data, options) {  
     if (!data || !Array.isArray(data.sellers) || 
         !Array.isArray(data.purchase_records) || 
         !Array.isArray(data.products) ||
@@ -41,19 +41,18 @@ function analyzeSalesData(data, options) {
         throw new Error('Некорректные входные данные');
     }
     
-
-    if (!options || typeof options !== 'object' || Array.isArray(options)) {
+   
+    if (!options || typeof options !== 'object' || Array.isArray(options) ||
+        (options.calculateRevenue && !options.calculateBonus) ||
+        (options.calculateBonus && !options.calculateRevenue)) {
         throw new Error('Некорректные входные данные');
     }
 
-    const calculateRevenue = options.calculateRevenue || calculateSimpleRevenue;
-    const calculateBonus = options.calculateBonus || calculateBonusByProfit;
+    const calculateRevenue = options?.calculateRevenue || calculateSimpleRevenue;
+    const calculateBonus = options?.calculateBonus || calculateBonusByProfit;
 
-    if (typeof calculateRevenue !== 'function') {
-        throw new Error('calculateRevenue должна быть функцией');
-    }
-    if (typeof calculateBonus !== 'function') {
-        throw new Error('calculateBonus должна быть функцией');
+    if (typeof calculateRevenue !== 'function' || typeof calculateBonus !== 'function') {
+        throw new Error('Некорректные входные данные');
     }
 
     const sellerStats = data.sellers.map(seller => ({
@@ -92,8 +91,8 @@ function analyzeSalesData(data, options) {
             const cost = product.purchase_price * item.quantity;
             const profit = revenue - cost;
             
-            seller.revenue += parseFloat(revenue);
-            seller.profit += parseFloat(profit);
+            seller.revenue += revenue;
+            seller.profit += profit;
             
             if (!seller.products_sold[item.sku]) {
                 seller.products_sold[item.sku] = 0;
@@ -104,8 +103,8 @@ function analyzeSalesData(data, options) {
 
    
     sellerStats.forEach(seller => {
+        seller.revenue = Math.round(seller.revenue * 100) / 100;
         seller.profit = Math.round(seller.profit * 100) / 100;
-        seller.revenue = parseFloat(seller.revenue.toFixed(2));
     });
 
     sellerStats.sort((a, b) => b.profit - a.profit);
